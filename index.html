@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body { 
+      height: 100vh; 
+      margin: 0; 
+      padding-top: 100px; /* Extra padding for the menu */
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+      cursor: crosshair;
+      background-color: #f4f4f9;
+    }
+    
+    /* The Menu Bar (Fixed at top) */
+    #menu { 
+      position: fixed; 
+      top: 0; 
+      width: 100%; 
+      background: white; 
+      padding: 15px; 
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1); 
+      display: flex; 
+      flex-wrap: wrap; /* Wraps on smaller screens */
+      gap: 20px; 
+      align-items: center;
+      box-sizing: border-box;
+    }
+
+    .control-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    label { font-weight: bold; color: #333; font-size: 14px; }
+    
+    /* Inputs */
+    input[type=color] { border: none; width: 40px; height: 40px; cursor: pointer; }
+    input[type=range] { cursor: pointer; }
+    input[type=file] { border: 1px solid #ddd; padding: 5px; border-radius: 4px; font-size: 12px; }
+    
+    /* The Marker Style */
+    .marker { 
+      position: absolute; 
+      pointer-events: none; 
+      transform: translate(-50%, -50%); 
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      transition: opacity 0.1s ease-in-out; /* Smooth appearance */
+    }
+
+    /* Clear Button */
+    #clearBtn {
+      margin-left: auto; /* Pushes button to the far right */
+      padding: 8px 16px;
+      background-color: #dc3545;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    #clearBtn:hover { background-color: #a71d2a; }
+
+  </style>
+</head>
+<body>
+
+  <div id="menu">
+    <!-- Color -->
+    <div class="control-group">
+      <label>Color:</label> 
+      <input type="color" id="colorPicker" value="#3498db">
+    </div>
+
+    <!-- Size -->
+    <div class="control-group">
+      <label>Size:</label> 
+      <input type="range" id="sizePicker" min="10" max="150" value="50">
+      <span id="sizeValue">50px</span>
+    </div>
+
+    <!-- Radius (Shape) -->
+    <div class="control-group">
+      <label>Corner Radius:</label> 
+      <input type="range" id="radiusPicker" min="0" max="50" value="50">
+      <span id="radiusValue">50%</span>
+    </div>
+
+    <!-- Image Upload -->
+    <div class="control-group">
+      <label>Or Use Image:</label> 
+      <input type="file" id="imageUpload" accept="image/*">
+    </div>
+
+    <!-- Clear Button -->
+    <button id="clearBtn">Clear All</button>
+  </div>
+
+  <script>
+    // --- State Variables ---
+    // We store the current image URL here (it starts as null)
+    let currentImageUrl = null;
+
+    // --- UI Element References ---
+    const colorPicker = document.getElementById('colorPicker');
+    const sizePicker = document.getElementById('sizePicker');
+    const sizeValueDisplay = document.getElementById('sizeValue');
+    const radiusPicker = document.getElementById('radiusPicker');
+    const radiusValueDisplay = document.getElementById('radiusValue');
+    const imageUpload = document.getElementById('imageUpload');
+    const clearBtn = document.getElementById('clearBtn');
+
+    // --- Real-time UI Updates (Optional but nice) ---
+    sizePicker.addEventListener('input', (e) => sizeValueDisplay.textContent = e.target.value + 'px');
+    radiusPicker.addEventListener('input', (e) => radiusValueDisplay.textContent = e.target.value + '%');
+
+    // --- Handle Image Upload ---
+    imageUpload.addEventListener('change', function(event) {
+      const file = event.target.files[0];
+      if (file) {
+        // This is the magic part: create a temporary URL for the uploaded file
+        currentImageUrl = URL.createObjectURL(file);
+        // Visual hint: the color picker won't affect the image, so we can disable it
+        colorPicker.disabled = true; 
+      }
+    });
+
+    // --- Handle Clear Button ---
+    clearBtn.addEventListener('click', () => {
+      // Select all elements with the class 'marker' and remove them
+      document.querySelectorAll('.marker').forEach(m => m.remove());
+    });
+
+    // --- Main Click Logic ---
+    window.addEventListener('click', function(event) {
+      // Don't create a marker if the click originated from the menu bar
+      if (event.target.closest('#menu')) return;
+
+      // Create the element
+      const marker = document.createElement('div');
+      
+      // Get current values from the UI
+      const color = colorPicker.value;
+      const size = sizePicker.value + 'px';
+      const radius = radiusPicker.value + '%';
+
+      // Apply styles
+      marker.className = 'marker';
+      marker.style.width = size;
+      marker.style.height = size;
+      marker.style.borderRadius = radius;
+
+      // Check if an image is loaded
+      if (currentImageUrl) {
+        // Use the image (ignores color)
+        marker.style.backgroundImage = `url('${currentImageUrl}')`;
+      } else {
+        // Use the solid color
+        marker.style.backgroundColor = color;
+      }
+      
+      // Position it
+      marker.style.left = event.clientX + 'px';
+      marker.style.top = event.clientY + 'px';
+      
+      // Add it to the page
+      document.body.appendChild(marker);
+    });
+  </script>
+
+</body>
+</html>
