@@ -134,7 +134,7 @@
       document.querySelectorAll('.marker').forEach(m => m.remove());
     });
 
-    // --- Main Click Logic ---
+  // --- Main Click Logic ---
     window.addEventListener('click', function(event) {
       // Don't create a marker if the click originated from the menu bar
       if (event.target.closest('#menu')) return;
@@ -155,10 +155,8 @@
 
       // Check if an image is loaded
       if (currentImageUrl) {
-        // Use the image (ignores color)
         marker.style.backgroundImage = `url('${currentImageUrl}')`;
       } else {
-        // Use the solid color
         marker.style.backgroundColor = color;
       }
       
@@ -168,7 +166,18 @@
       
       // Add it to the page
       document.body.appendChild(marker);
+
+      // --- NEW: FADE AND REMOVE LOGIC ---
+      // Wait 1 second (1000ms), then start fading out
+      setTimeout(() => {
+        marker.style.opacity = '0';
+        // Wait another 0.5s (500ms) for the fade to finish, then remove the element
+        setTimeout(() => {
+          marker.remove();
+        }, 500);
+      }, 1000);
     });
+
   </script>
 
 </body>
